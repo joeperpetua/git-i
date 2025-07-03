@@ -224,10 +224,10 @@ const commit = async ({ interactive }: {interactive?: boolean}) => {
     const commitMessage = await input({ message: 'Commit message:', required: true }).catch(catchInputError);
     const commitDescription = await input({ message: 'Commit description:' }).catch(catchInputError);
     const descriptionArg = commitDescription
-      ? ['-m', `"${escapeChars(commitDescription, ['"'])}"`]
+      ? ['-m', `${commitDescription}`]
       : [];
 
-    await execa('git', ['commit', '-m', `"${escapeChars(commitMessage, ['"'])}"`, ...descriptionArg]);
+    await execa('git', ['commit', '-m', `${commitMessage}`, ...descriptionArg]);
 
     console.log('Successfully committed changes.');
   }
