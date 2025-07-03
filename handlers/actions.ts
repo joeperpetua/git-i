@@ -1,13 +1,50 @@
-import { checkbox, Separator } from "@inquirer/prompts"
+import { checkbox, input, select, Separator } from "@inquirer/prompts"
 import { execa } from "execa"
 import { catchCheckboxError, catchExecError } from "./errors.js"
+import { escapeChars } from "../utils.js"
+
+const start = async () => {
+  console.clear()
+
+  const action = await select({
+    message: 'What would you like to do?',
+    choices: [
+      { name: 'Add files', value: 'add' },
+      { name: 'Restore changes', value: 'restore' },
+      { name: 'Delete branches', value: 'branch delete' },
+      { name: 'Commit changes', value: 'commit' },
+      new Separator(),
+      { name: 'Exit', value: 'exit' }
+    ]
+  })
+
+  switch (action) {
+    case 'add':
+      await add()
+      break
+    case 'restore':
+      await restore()
+      break
+    case 'branch delete':
+      await branchDelete()
+      break
+    case 'commit':
+      await commit()
+      break
+    case 'exit':
+      console.log('Exiting git-i...')
+      process.exit(0)
+    default:
+      console.log('Invalid action. Please try again.')
+  }
+} 
 
 const add = async () => {
   try {
     const { stdout } = await execa('git', ['status', '--short'])
     if (!stdout) {
       console.log('No changes to add. Working tree is clean.')
-      return
+      process.exit(0)
     }
 
     const addableFiles = stdout
@@ -43,7 +80,7 @@ const add = async () => {
 
     if (uniqueFiles.length === 0) {
       console.log('No unstaged changes to add.')
-      return
+      process.exit(0)
     }
 
     const selectedFiles = await checkbox({
@@ -54,7 +91,7 @@ const add = async () => {
 
     if (!selectedFiles || selectedFiles.length === 0) {
       console.log('No files selected. Aborting.')
-      return
+      process.exit(0)
     }
 
     await execa('git', ['add', ...selectedFiles])
@@ -63,6 +100,8 @@ const add = async () => {
   } catch (err: any) {
     catchExecError(err)
   }
+
+  start();
 }
 
 const restore = async () => {
@@ -70,7 +109,7 @@ const restore = async () => {
     const { stdout } = await execa('git', ['status', '--short'])
     if (!stdout) {
       console.log('No changes to restore. Working tree is clean.')
-      return
+      process.exit(0)
     }
 
     const lines = stdout.split('\n').filter(line => line.trim() !== '')
@@ -94,7 +133,7 @@ const restore = async () => {
 
     if (changesToSelect.length === 0) {
       console.log('No staged or unstaged changes to restore.')
-      return
+      process.exit(0)
     }
 
     const stagedChangesChoices = changesToSelect
@@ -120,7 +159,7 @@ const restore = async () => {
 
     if (!selectedChanges || selectedChanges.length === 0) {
       console.log('No changes selected. Aborting.')
-      return
+      process.exit(0)
     }
 
     const toUnstage = selectedChanges.filter(change => change.type === 'staged').map(change => change.path)
@@ -138,6 +177,8 @@ const restore = async () => {
   } catch (err: any) {
     catchExecError(err)
   }
+
+  start();
 }
 
 const branchDelete = async () => {
@@ -156,7 +197,7 @@ const branchDelete = async () => {
     }).catch(catchCheckboxError)
 
     if (!selectedBranches || selectedBranches.length === 0)
-      return
+      process.exit(0)
 
     await execa('git', ['branch', '-d', ...selectedBranches])
 
@@ -164,10 +205,33 @@ const branchDelete = async () => {
   } catch (err: any) {
     catchExecError(err)
   }
+
+  start();
+}
+
+const commit = async () => {
+  try {
+    const commitMessage = await input({ message: 'Commit message:', required: true });
+    const commitDescription = await input({ message: 'Commit description:' });
+    const descriptionArg = commitDescription
+      ? ['-m', `"${escapeChars(commitDescription, ['"'])}"`]
+      : [];
+
+    await execa('git', ['commit', '-m', `"${escapeChars(commitMessage, ['"'])}"`, ...descriptionArg]);
+
+    console.log('Successfully committed changes.');
+  }
+  catch (err: any) {
+    catchExecError(err)
+  }
+
+  start();
 }
 
 export {
+  start,
   add,
   restore,
-  branchDelete
+  branchDelete,
+  commit
 }

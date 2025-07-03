@@ -13,8 +13,16 @@ const catchCheckboxError = (err: any) => {
 const catchExecError = (err: any) => {
   console.log(separator)
   console.error('Error while running command: ', err.command)
-  console.log(separator)
-  console.error(err.stderr)
+
+  if (err.stderr) {
+    console.log(separator)
+    console.error(err.stderr)
+  }
+
+  if (err.stdout) {
+    console.log(separator)
+    console.error(err.stdout)
+  }
 }
 
 export {

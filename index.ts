@@ -1,28 +1,38 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander'
-import { add, branchDelete, restore } from './handlers/actions.js';
+import { add, branchDelete, commit, restore, start } from './handlers/actions.js';
 
 const program = new Command()
 
 program
   .name('git-i')
-  .description('Interactive git wrapper')
+  .description('interactive git wrapper')
   .version('0.1.0')
 
 program
+  .command('start', { isDefault: true })
+  .description('start interactive session')
+  .action(start)
+
+program
   .command('add')
-  .description('Stage files for commit')
+  .description('stage files for commit')
   .action(add)
 
 program
   .command('restore')
-  .description('Discard changes or unstage files')
+  .description('discard changes or unstage files')
   .action(restore)
 
 program
   .command('branch delete')
-  .description('Interactive branch management')
+  .description('interactive branch management')
   .action(branchDelete)
+
+program
+  .command('commit')
+  .description('interactive commit')
+  .action(commit)
 
 program.parse(process.argv)
