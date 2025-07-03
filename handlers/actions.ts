@@ -1,11 +1,9 @@
 import { checkbox, input, select, Separator } from "@inquirer/prompts"
 import { execa } from "execa"
-import { catchCheckboxError, catchExecError } from "./errors.js"
+import { catchCheckboxError, catchExecError, catchInputError } from "./errors.js"
 import { escapeChars } from "../utils.js"
 
 const start = async () => {
-  console.clear()
-
   const action = await select({
     message: 'What would you like to do?',
     choices: [
@@ -16,20 +14,25 @@ const start = async () => {
       new Separator(),
       { name: 'Exit', value: 'exit' }
     ]
-  })
+  }).catch(catchInputError)
+
+  if (!action) {
+    console.log('Exiting git-i...')
+    process.exit(0)
+  }
 
   switch (action) {
     case 'add':
-      await add()
+      await add({ interactive: true })
       break
     case 'restore':
-      await restore()
+      await restore({ interactive: true })
       break
     case 'branch delete':
-      await branchDelete()
+      await branchDelete({ interactive: true })
       break
     case 'commit':
-      await commit()
+      await commit({ interactive: true })
       break
     case 'exit':
       console.log('Exiting git-i...')
@@ -39,7 +42,8 @@ const start = async () => {
   }
 } 
 
-const add = async () => {
+const add = async ({ interactive }: {interactive?: boolean}) => {
+  console.clear()
   try {
     const { stdout } = await execa('git', ['status', '--short'])
     if (!stdout) {
@@ -101,10 +105,12 @@ const add = async () => {
     catchExecError(err)
   }
 
-  start();
+  if (interactive)
+    start();
 }
 
-const restore = async () => {
+const restore = async ({ interactive }: {interactive?: boolean}) => {
+  console.clear()
   try {
     const { stdout } = await execa('git', ['status', '--short'])
     if (!stdout) {
@@ -178,10 +184,12 @@ const restore = async () => {
     catchExecError(err)
   }
 
-  start();
+  if (interactive)
+    start();
 }
 
-const branchDelete = async () => {
+const branchDelete = async ({ interactive }: {interactive?: boolean}) => {
+  console.clear()
   try {
     const result = await execa('git', ['branch'])
 
@@ -206,13 +214,15 @@ const branchDelete = async () => {
     catchExecError(err)
   }
 
-  start();
+  if (interactive)
+    start();
 }
 
-const commit = async () => {
+const commit = async ({ interactive }: {interactive?: boolean}) => {
+  console.clear()
   try {
-    const commitMessage = await input({ message: 'Commit message:', required: true });
-    const commitDescription = await input({ message: 'Commit description:' });
+    const commitMessage = await input({ message: 'Commit message:', required: true }).catch(catchInputError);
+    const commitDescription = await input({ message: 'Commit description:' }).catch(catchInputError);
     const descriptionArg = commitDescription
       ? ['-m', `"${escapeChars(commitDescription, ['"'])}"`]
       : [];
@@ -225,7 +235,8 @@ const commit = async () => {
     catchExecError(err)
   }
 
-  start();
+  if (interactive)
+    start();
 }
 
 export {

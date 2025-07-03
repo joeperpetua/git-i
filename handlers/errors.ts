@@ -10,6 +10,16 @@ const catchCheckboxError = (err: any) => {
   return []
 }
 
+const catchInputError = (err: any) => {
+  if (err?.name === 'ExitPromptError') {
+    return ''
+  }
+  console.log(separator)
+  console.error('Error:', err)
+  console.log(separator)
+  return ''
+}
+
 const catchExecError = (err: any) => {
   console.log(separator)
   console.error('Error while running command: ', err.command)
@@ -27,5 +37,6 @@ const catchExecError = (err: any) => {
 
 export {
   catchCheckboxError,
+  catchInputError,
   catchExecError
 }
