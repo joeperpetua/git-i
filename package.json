@@ -11,7 +11,7 @@
 		"start": "tsx index.ts"
 	},
 	"author": "joeperpetua",
-	"license": "ISC",
+	"license": "MIT",
 	"description": "",
 	"dependencies": {
 		"@inquirer/prompts": "^7.5.3",
