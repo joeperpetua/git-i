@@ -13,6 +13,25 @@
 	},
 	"author": "joeperpetua",
 	"license": "MIT",
+	"homepage": "https://github.com/joeperpetua/git-i",
+	"bugs": {
+		"url": "https://github.com/joeperpetua/git-i/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/joeperpetua/git-i.git"
+	},
+	"keywords": [
+		"git",
+		"interactive",
+		"wrapper",
+		"cli",
+		"git-i",
+		"joeperpetua",
+		"batch",
+		"bulk", 
+		"shell"
+	],
 	"dependencies": {
 		"@inquirer/prompts": "^7.5.3",
 		"commander": "^14.0.0",
