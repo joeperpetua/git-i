@@ -1,7 +1,12 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander'
-import { add, branchDelete, commit, push, restore, start } from './handlers/actions.js';
+import start from './handlers/start.js'
+import add from './handlers/add.js'
+import commit from './handlers/commit.js'
+import push from './handlers/push.js'
+import restore from './handlers/restore.js'
+import { branchDelete } from './handlers/branch.js'
 
 const program = new Command()
 
