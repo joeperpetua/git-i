@@ -1,5 +1,6 @@
 {
-	"name": "git-interactive",
+	"name": "@joeperpetua/git-i",
+	"description": "An interactive git wrapper to save time in your daily workflow.",
 	"version": "1.0.0",
 	"main": "index.js",
 	"type": "module",
@@ -12,7 +13,6 @@
 	},
 	"author": "joeperpetua",
 	"license": "MIT",
-	"description": "",
 	"dependencies": {
 		"@inquirer/prompts": "^7.5.3",
 		"commander": "^14.0.0",

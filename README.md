@@ -1,24 +1,24 @@
-# git-interactive
+# git-i
 
 A command-line tool that provides a simple, interactive interface for common Git operations.
 
 ## Overview
 
-`git-interactive` is designed to streamline your daily Git workflow. Instead of remembering various Git commands and flags, you can use this tool to perform actions like adding, committing, and pushing changes through an easy-to-use interactive menu.
+`git-i` is designed to streamline your daily Git workflow. Instead of remembering various Git commands and flags, you can use this tool to perform actions like adding, committing, and pushing changes through an easy-to-use interactive menu.
 
 It's perfect for both beginners who are learning Git and experienced developers who want to speed up their workflow.
 
 ## Installation
 
-To install `git-interactive` globally on your system, run the following command:
+To install `git-i` globally on your system, run the following command:
 
 ```bash
-npm install -g git-interactive
+npm install -g @joeperpetua/git-i
 ```
 
 ## Usage
 
-You can use `git-interactive` in two main ways:
+You can use `git-i` in two main ways:
 
 ### 1. Interactive Mode
 
