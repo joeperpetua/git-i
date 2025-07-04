@@ -1,20 +1,26 @@
 import { checkbox, input, select, Separator } from "@inquirer/prompts"
 import { execa } from "execa"
 import { catchCheckboxError, catchExecError, catchInputError } from "./errors.js"
-import { escapeChars } from "../utils.js"
+
+const interactiveChoices = [
+  { name: 'Add files', value: 'add', callback: async () => await add({ interactive: true }) },
+  { name: 'Restore changes', value: 'restore', callback: async () => await restore({ interactive: true }) },
+  { name: 'Delete branches', value: 'branch delete', callback: async () => await branchDelete({ interactive: true }) },
+  { name: 'Commit changes', value: 'commit', callback: async () => await commit({ interactive: true }) },
+  { name: 'Amend previous commit', value: 'commit --amend', callback: async () => await commit({ interactive: true, amend: true }) },
+  { name: 'Push to remote', value: 'push', callback: async () => await push({ interactive: true }) },
+  { name: 'Force push to remote', value: 'push --force', callback: async () => await push({ interactive: true, force: true }) },
+]
 
 const start = async () => {
   const action = await select({
     message: 'What would you like to do?',
     choices: [
-      { name: 'Add files', value: 'add' },
-      { name: 'Restore changes', value: 'restore' },
-      { name: 'Delete branches', value: 'branch delete' },
-      { name: 'Commit changes', value: 'commit' },
-      { name: 'Push remote', value: 'push' },
+      ...interactiveChoices,
       new Separator(),
-      { name: 'Exit', value: 'exit' }
-    ]
+      { name: 'Exit', value: 'exit' },
+    ],
+    loop: false
   }).catch(catchInputError)
 
   if (!action) {
@@ -22,27 +28,16 @@ const start = async () => {
     process.exit(0)
   }
 
-  switch (action) {
-    case 'add':
-      await add({ interactive: true })
-      break
-    case 'restore':
-      await restore({ interactive: true })
-      break
-    case 'branch delete':
-      await branchDelete({ interactive: true })
-      break
-    case 'commit':
-      await commit({ interactive: true })
-      break
-    case 'push':
-      await push({ interactive: true })
-      break
-    case 'exit':
-      console.log('Exiting git-i...')
-      process.exit(0)
-    default:
-      console.log('Invalid action. Please try again.')
+  if (action === 'exit') {
+    console.log('Exiting git-i...')
+    process.exit(0)
+  }
+
+  const foundChoice = interactiveChoices.find(choice => choice.value === action)
+  if (foundChoice) {
+    await foundChoice.callback()
+  } else {
+    console.log('Invalid action. Please try again.')
   }
 }
 
@@ -222,16 +217,24 @@ const branchDelete = async ({ interactive }: { interactive?: boolean }) => {
     start();
 }
 
-const commit = async ({ interactive }: { interactive?: boolean }) => {
+const commit = async ({ interactive, amend }: { interactive?: boolean, amend?: boolean }) => {
   console.clear()
   try {
     const commitMessage = await input({ message: 'Commit message:', required: true }).catch(catchInputError);
-    const commitDescription = await input({ message: 'Commit description:' }).catch(catchInputError);
-    const descriptionArg = commitDescription
-      ? ['-m', `${commitDescription}`]
-      : [];
+    if (!commitMessage) return; // User cancelled the prompt
 
-    await execa('git', ['commit', '-m', `${commitMessage}`, ...descriptionArg]);
+    const commitDescription = await input({ message: 'Commit description:' }).catch(catchInputError);
+
+    const args = ['commit', '-m', commitMessage];
+    if (commitDescription) args.push('-m', commitDescription);
+    if (amend) args.push('--amend');
+    
+    const result = await execa('git', args);
+
+    if (result.stdout) {
+      console.log(result.stdout)
+      console.log('\n')
+    }
 
     console.log('Successfully committed changes.');
   }
@@ -243,7 +246,7 @@ const commit = async ({ interactive }: { interactive?: boolean }) => {
     start();
 }
 
-const push = async ({ interactive }: { interactive?: boolean }) => {
+const push = async ({ interactive, force }: { interactive?: boolean, force?: boolean }) => {
   console.clear()
   try {
     const remotesResult = await execa('git', ['remote'])
@@ -265,12 +268,12 @@ const push = async ({ interactive }: { interactive?: boolean }) => {
     }
 
     const selectedRemote = await select({
-      message: 'Select remote to push to:',
+      message: `Select remote to${force ? ' force ' : ' '}push to:`,
       choices: remotes.map(remote => ({ name: remote, value: remote }))
     }).catch(catchInputError)
 
     const selectedBranch = await select({
-      message: 'Select branch to push:',
+      message: `Select branch to${force ? ' force ' : ' '}push:`,
       choices: branches.map(branch => ({ name: branch, value: branch, default: branch === currentBranch }))
     }).catch(catchInputError)
 
@@ -279,7 +282,7 @@ const push = async ({ interactive }: { interactive?: boolean }) => {
       process.exit(0)
     }
 
-    const result = await execa('git', ['push', selectedRemote, selectedBranch])
+    const result = await execa('git', ['push', selectedRemote, selectedBranch, force ? '--force' : ''])
 
     if (result.stderr) {
       console.log(result.stderr)
@@ -289,6 +292,7 @@ const push = async ({ interactive }: { interactive?: boolean }) => {
     if (result.stdout) {
       console.log(result.stdout)
       console.log('\n')
+      console.log('Successfully pushed to remote.');
     }
 
     if (interactive)
@@ -304,5 +308,6 @@ export {
   add,
   restore,
   branchDelete,
-  commit
+  commit,
+  push
 }

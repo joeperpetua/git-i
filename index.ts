@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander'
-import { add, branchDelete, commit, restore, start } from './handlers/actions.js';
+import { add, branchDelete, commit, push, restore, start } from './handlers/actions.js';
 
 const program = new Command()
 
@@ -32,12 +32,14 @@ program
 
 program
   .command('commit')
+  .option('--amend', 'amend previous commit')
   .description('interactive commit')
-  .action(commit)
+  .action(({ amend }) => commit({ amend }))
 
 program
   .command('push')
+  .option('--force', 'force push to remote')
   .description('interactive push')
-  .action(commit)
+  .action(({ force }) => push({ force }))
 
 program.parse(process.argv)
