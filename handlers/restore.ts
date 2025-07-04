@@ -4,7 +4,6 @@ import start from "./start.js"
 import { catchCheckboxError, catchExecError } from "./errors.js"
 
 const restore = async ({ interactive }: { interactive?: boolean }) => {
-  console.log('\n')
   try {
     const { stdout } = await execa('git', ['status', '--short'])
     if (!stdout) {

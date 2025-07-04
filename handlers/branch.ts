@@ -4,7 +4,6 @@ import { handleEnd } from "../utils.js"
 import { catchCheckboxError, catchExecError } from "./errors.js"
 
 const branchDelete = async ({ interactive }: { interactive?: boolean }) => {
-  console.log('\n')
   try {
     const branchesResult = await execa('git', ['branch'])
 

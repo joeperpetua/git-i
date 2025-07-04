@@ -1,5 +1,5 @@
 import { select, Separator } from "@inquirer/prompts"
-import { catchInputError } from "./errors.js"
+import { catchInputError, separator } from "./errors.js"
 import add from "./add.js"
 import commit from "./commit.js"
 import push from "./push.js"
@@ -17,6 +17,7 @@ const interactiveChoices = [
 ]
 
 const start = async () => {
+  console.log(separator)
   const action = await select({
     message: 'What would you like to do?',
     choices: [

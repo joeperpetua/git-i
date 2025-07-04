@@ -38,5 +38,6 @@ const catchExecError = (err: any) => {
 export {
   catchCheckboxError,
   catchInputError,
-  catchExecError
+  catchExecError,
+  separator
 }

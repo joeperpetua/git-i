@@ -9,7 +9,6 @@ export const escapeChars = (text: string, chars: string[]) => {
 }
 
 export const handleEnd = (result: Result<{}>, interactive?: boolean) => {
-  if (result.stderr) console.error(result.stderr)
-  if (result.stdout) console.log(result.stdout)
+  for (const out of result.stdio) out && console.log(out)
   if (interactive) start();
 }

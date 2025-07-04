@@ -4,7 +4,6 @@ import { handleEnd } from "../utils.js"
 import { catchExecError, catchInputError } from "./errors.js"
 
 const push = async ({ interactive, force }: { interactive?: boolean, force?: boolean }) => {
-  console.log('\n')
   try {
     const remotesResult = await execa('git', ['remote'])
     const remotes = remotesResult.stdout.split('\n').filter(line => line.trim() !== '')

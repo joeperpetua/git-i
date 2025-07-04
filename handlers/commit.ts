@@ -5,7 +5,7 @@ import { catchInputError, catchExecError } from "./errors.js";
 
 const commit = async ({ interactive, amend }: { interactive?: boolean, amend?: boolean }) => {
   try {
-    const previousCommitMessage = await execa('git', ['log', '-1', '--pretty=%B']).then(res => res.stdout);
+    const previousCommitMessage = await execa('git', ['log', '-1', '--pretty=%B']).then(res => res.stdout.trim());
     const commitMessage = await input({
       message: amend ? 'Amend message (tab to edit | backspace to delete):' : 'Commit message:',
       default: amend ? previousCommitMessage : '',
