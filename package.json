@@ -1,7 +1,7 @@
 {
 	"name": "@joeperpetua/git-i",
 	"description": "An interactive git wrapper to save time in your daily workflow.",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"main": "index.js",
 	"type": "module",
 	"bin": {
@@ -29,7 +29,7 @@
 		"git-i",
 		"joeperpetua",
 		"batch",
-		"bulk", 
+		"bulk",
 		"shell"
 	],
 	"dependencies": {
