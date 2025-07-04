@@ -11,6 +11,7 @@ const start = async () => {
       { name: 'Restore changes', value: 'restore' },
       { name: 'Delete branches', value: 'branch delete' },
       { name: 'Commit changes', value: 'commit' },
+      { name: 'Push remote', value: 'push' },
       new Separator(),
       { name: 'Exit', value: 'exit' }
     ]
@@ -34,15 +35,18 @@ const start = async () => {
     case 'commit':
       await commit({ interactive: true })
       break
+    case 'push':
+      await push({ interactive: true })
+      break
     case 'exit':
       console.log('Exiting git-i...')
       process.exit(0)
     default:
       console.log('Invalid action. Please try again.')
   }
-} 
+}
 
-const add = async ({ interactive }: {interactive?: boolean}) => {
+const add = async ({ interactive }: { interactive?: boolean }) => {
   console.clear()
   try {
     const { stdout } = await execa('git', ['status', '--short'])
@@ -109,7 +113,7 @@ const add = async ({ interactive }: {interactive?: boolean}) => {
     start();
 }
 
-const restore = async ({ interactive }: {interactive?: boolean}) => {
+const restore = async ({ interactive }: { interactive?: boolean }) => {
   console.clear()
   try {
     const { stdout } = await execa('git', ['status', '--short'])
@@ -188,7 +192,7 @@ const restore = async ({ interactive }: {interactive?: boolean}) => {
     start();
 }
 
-const branchDelete = async ({ interactive }: {interactive?: boolean}) => {
+const branchDelete = async ({ interactive }: { interactive?: boolean }) => {
   console.clear()
   try {
     const result = await execa('git', ['branch'])
@@ -218,7 +222,7 @@ const branchDelete = async ({ interactive }: {interactive?: boolean}) => {
     start();
 }
 
-const commit = async ({ interactive }: {interactive?: boolean}) => {
+const commit = async ({ interactive }: { interactive?: boolean }) => {
   console.clear()
   try {
     const commitMessage = await input({ message: 'Commit message:', required: true }).catch(catchInputError);
@@ -237,6 +241,62 @@ const commit = async ({ interactive }: {interactive?: boolean}) => {
 
   if (interactive)
     start();
+}
+
+const push = async ({ interactive }: { interactive?: boolean }) => {
+  console.clear()
+  try {
+    const remotesResult = await execa('git', ['remote'])
+    const remotes = remotesResult.stdout.split('\n').filter(line => line.trim() !== '')
+
+    const branchesResult = await execa('git', ['branch'])
+    const currentBranchResult = await execa('git', ['branch', '--show-current'])
+    const branches = branchesResult.stdout.split('\n').map(line => line.replace('*', '').trim())
+    const currentBranch = currentBranchResult.stdout.trim()
+
+    if (remotes.length === 0) {
+      console.log('No remotes found. Aborting.')
+      process.exit(0)
+    }
+
+    if (branches.length === 0) {
+      console.log('No branches found. Aborting.')
+      process.exit(0)
+    }
+
+    const selectedRemote = await select({
+      message: 'Select remote to push to:',
+      choices: remotes.map(remote => ({ name: remote, value: remote }))
+    }).catch(catchInputError)
+
+    const selectedBranch = await select({
+      message: 'Select branch to push:',
+      choices: branches.map(branch => ({ name: branch, value: branch, default: branch === currentBranch }))
+    }).catch(catchInputError)
+
+    if (!selectedRemote || !selectedBranch) {
+      console.log('Aborting push.')
+      process.exit(0)
+    }
+
+    const result = await execa('git', ['push', selectedRemote, selectedBranch])
+
+    if (result.stderr) {
+      console.log(result.stderr)
+      console.log('\n')
+    }
+
+    if (result.stdout) {
+      console.log(result.stdout)
+      console.log('\n')
+    }
+
+    if (interactive)
+      start();
+  }
+  catch (err: any) {
+    catchExecError(err)
+  }
 }
 
 export {

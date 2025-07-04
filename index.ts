@@ -35,4 +35,9 @@ program
   .description('interactive commit')
   .action(commit)
 
+program
+  .command('push')
+  .description('interactive push')
+  .action(commit)
+
 program.parse(process.argv)
